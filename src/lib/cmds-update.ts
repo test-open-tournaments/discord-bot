@@ -1,6 +1,6 @@
-import { readdir } from 'node:fs/promises'
 import env from '@env'
 import { REST, Routes } from 'discord.js'
+import { readdir } from 'node:fs/promises'
 
 import { Logger } from './zenith'
 
@@ -38,9 +38,7 @@ async function getCommands() {
 	}
 }
 
-const rest = new REST().setToken(
-	env.GLOBAL_PUSH ? env.GLOBAL_DISCORD_TOKEN : env.DISCORD_TOKEN
-)
+const rest = new REST().setToken(env.DISCORD_TOKEN)
 
 async function deployCommands() {
 	logger.info(`deploying ${commands.length} commands to ${environment}`, true)
@@ -48,10 +46,9 @@ async function deployCommands() {
 	let deployData: ApplicationCommand[] = []
 
 	if (env.GLOBAL_PUSH) {
-		deployData = (await rest.put(
-			Routes.applicationCommands(env.GLOBAL_CLIENT_ID),
-			{ body: commands }
-		)) as ApplicationCommand[]
+		deployData = (await rest.put(Routes.applicationCommands(env.CLIENT_ID), {
+			body: commands
+		})) as ApplicationCommand[]
 	} else {
 		deployData = (await rest.put(
 			Routes.applicationGuildCommands(env.CLIENT_ID, env.DEV_GUILD),

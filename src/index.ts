@@ -1,9 +1,9 @@
-import '@env'
+import env from '@env'
 import { DiscordBot } from 'zenith'
 
 const bot = new DiscordBot({
 	startOnInitialize: false,
-	developers: ['1098012402324349070'],
+	developers: [env.DEV_ID],
 	intents: ['Guilds', 'GuildMembers', 'GuildMessages']
 })
 
