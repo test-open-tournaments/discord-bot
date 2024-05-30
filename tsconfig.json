@@ -22,6 +22,7 @@
 			"@env": ["lib/env"],
 			"@utils": ["lib/utils.ts"],
 			"@types": ["types/index.ts"],
+			"@supabase": ["lib/supabase.ts"],
 			"~/*": ["*"]
 		}
 	}
