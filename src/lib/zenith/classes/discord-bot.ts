@@ -6,7 +6,9 @@ import { ZenithErrorCodes } from '../types'
 import { interactionHandler } from '../utils/interaction-handler'
 import { ZenithError } from './zenith-error'
 
+import { type SupabaseClient, createClient } from '@supabase/supabase-js'
 import type { ClientEvents } from 'discord.js'
+import type { Database } from '~/types/database.types'
 import type {
 	Command,
 	Cooldown,
@@ -24,6 +26,7 @@ export class DiscordBot extends Client {
 	logger: Logger
 	commands = new Collection<string, Command>()
 	cooldowns = new Collection<string, Cooldown>()
+	db: SupabaseClient<Database>
 
 	constructor({
 		intents = ['Guilds'],
@@ -37,13 +40,23 @@ export class DiscordBot extends Client {
 			method: 'POST',
 			interval: 3
 		},
-		entryLocation = '/src'
+		entryLocation = '/src',
+		supabaseUrl = process.env.SUPABASE_URL,
+		supabaseKey = process.env.SUPABASE_KEY
 	}: Partial<DiscordBotOptions>) {
 		if (!token) {
 			throw new ZenithError({
 				code: ZenithErrorCodes.InvalidDiscordToken,
 				message:
 					'Please set the token in the options or in the environment variable DISCORD_TOKEN.'
+			})
+		}
+
+		if (!supabaseUrl || !supabaseKey) {
+			throw new ZenithError({
+				code: ZenithErrorCodes.InvalidSupabaseCredentials,
+				message:
+					'Please set the supabase url and key in the options or in the environment variables SUPABASE_URL and SUPABASE_KEY.'
 			})
 		}
 
@@ -77,6 +90,7 @@ export class DiscordBot extends Client {
 		this.monitoring = monitoring
 		this.entryLocation = `${process.cwd()}${entryLocation}`
 		this.logger = new Logger(loggerEvents)
+		this.db = createClient(supabaseUrl, supabaseKey)
 
 		if (this.startOnInitialize) this.start()
 		if (this.monitoring.enabled) this._monitor()

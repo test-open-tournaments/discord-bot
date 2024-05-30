@@ -1,6 +1,6 @@
 import { Collection } from 'discord.js'
 
-import { ephem } from '.'
+import { ephem, getSettings } from '.'
 
 import type { Interaction } from 'discord.js'
 import type { DiscordBot } from '..'
@@ -65,6 +65,22 @@ export async function interactionHandler(
 	}
 
 	try {
+		if (command.getSettings) {
+			if (!interaction.guildId) {
+				return interaction.reply(ephem('Failed to get guild id.'))
+			}
+			const settings = await getSettings(client.db, interaction.guildId)
+
+			if (!settings) {
+				return interaction.reply(
+					ephem(
+						'This command requires settings and none were found. Please ask your admins to use the dashboard to create them.'
+					)
+				)
+			}
+
+			return command.execute({ interaction, client, settings })
+		}
 		command.execute({ interaction, client })
 	} catch (err) {
 		if (err instanceof Error) {

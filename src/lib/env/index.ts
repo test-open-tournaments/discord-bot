@@ -15,7 +15,7 @@ const envSchema = v.object({
 	DEV_ID: v.string([v.minLength(1)]),
 	DEV_GUILD: v.string([v.minLength(1)]),
 	SUPABASE_URL: v.string([v.minLength(1)]),
-	SUPABASE_SERVICE_ROLE_KEY: v.string([v.minLength(1)])
+	SUPABASE_KEY: v.string([v.minLength(1)])
 })
 
 export default handleParse(envSchema)

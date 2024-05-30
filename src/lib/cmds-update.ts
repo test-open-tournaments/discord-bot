@@ -1,6 +1,6 @@
+import { readdir } from 'node:fs/promises'
 import env from '@env'
 import { REST, Routes } from 'discord.js'
-import { readdir } from 'node:fs/promises'
 
 import { Logger } from './zenith'
 

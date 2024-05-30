@@ -8,6 +8,7 @@ import type {
 	SlashCommandBuilder,
 	SlashCommandSubcommandsOnlyBuilder
 } from 'discord.js'
+import type { Tables } from '~/types/database.types'
 import type { DiscordBot } from '..'
 
 export type LoggerEvents = 'commands' | 'events' | 'started' | 'stopped'
@@ -25,6 +26,8 @@ export interface DiscordBotOptions {
 		interval?: number
 	}
 	entryLocation: string
+	supabaseUrl: string
+	supabaseKey: string
 }
 
 export interface EventOptions<EventType extends keyof ClientEvents> {
@@ -33,15 +36,8 @@ export interface EventOptions<EventType extends keyof ClientEvents> {
 	execute: (client: DiscordBot, ...args: ClientEvents[EventType]) => void
 }
 
-export interface Command {
-	devOnly?: boolean
-	cooldown?: number
-	permissions?: PermissionResolvable[]
-	requiredRoles?: string[]
-	data:
-		| SlashCommandBuilder
-		| Omit<SlashCommandBuilder, 'addSubcommandGroup' | 'addSubcommand'>
-		| SlashCommandSubcommandsOnlyBuilder
+interface CommandWithoutSettings {
+	getSettings?: false
 	execute: ({
 		interaction,
 		client
@@ -50,6 +46,30 @@ export interface Command {
 		client: DiscordBot
 	}) => void
 }
+
+interface CommandWithSettings {
+	getSettings: true
+	execute: ({
+		interaction,
+		client,
+		settings
+	}: {
+		interaction: ChatInputCommandInteraction
+		client: DiscordBot
+		settings: Tables<'settings'>
+	}) => void
+}
+
+export type Command = {
+	devOnly?: boolean
+	cooldown?: number
+	permissions?: PermissionResolvable[]
+	requiredRoles?: string[]
+	data:
+		| SlashCommandBuilder
+		| Omit<SlashCommandBuilder, 'addSubcommandGroup' | 'addSubcommand'>
+		| SlashCommandSubcommandsOnlyBuilder
+} & (CommandWithoutSettings | CommandWithSettings)
 
 export interface Event<
 	EventType extends keyof ClientEvents = keyof ClientEvents
@@ -66,7 +86,8 @@ export enum ZenithErrorCodes {
 	InvalidEntryLocation = 'INVALID_ENTRY_LOCATION',
 	InvalidMonitoringURL = 'INVALID_MONITORING_URL',
 	InvalidMonitoringInterval = 'INVALID_MONITORING_INTERVAL',
-	FailedToAddUnverifiedRole = 'FAILED_TO_ADD_UNVERIFIED_ROLE'
+	FailedToAddUnverifiedRole = 'FAILED_TO_ADD_UNVERIFIED_ROLE',
+	InvalidSupabaseCredentials = 'INVALID_SUPABASE_CREDENTIALS'
 }
 
 export interface ZenithErrorOptions {
