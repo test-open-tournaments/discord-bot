@@ -1,20 +1,20 @@
 import { Environment } from '@types'
-import { boolean, coerce, enum_, object, optional, string } from 'valibot'
+import * as v from 'valibot'
 
-import { fromEnv, handleParse } from './helpers'
+import { handleParse } from './helpers'
 
 //* Define environment variables here
-const envSchema = object({
-	NODE_ENV: optional(enum_(Environment), Environment.development),
-	DISCORD_TOKEN: string([fromEnv()]),
-	GLOBAL_DISCORD_TOKEN: string([fromEnv()]),
-	CLIENT_ID: string([fromEnv()]),
-	GLOBAL_CLIENT_ID: string([fromEnv()]),
-	GLOBAL_PUSH: optional(
-		coerce(boolean(), i => i === 'true'),
+const envSchema = v.object({
+	NODE_ENV: v.optional(v.enum_(Environment), Environment.development),
+	DISCORD_TOKEN: v.string([v.minLength(1)]),
+	GLOBAL_DISCORD_TOKEN: v.string([v.minLength(1)]),
+	CLIENT_ID: v.string([v.minLength(1)]),
+	GLOBAL_CLIENT_ID: v.string([v.minLength(1)]),
+	GLOBAL_PUSH: v.optional(
+		v.coerce(v.boolean(), i => i === 'true'),
 		false
 	),
-	DEV_GUILD: string([fromEnv()])
+	DEV_GUILD: v.string([v.minLength(1)])
 })
 
 export default handleParse(envSchema)
